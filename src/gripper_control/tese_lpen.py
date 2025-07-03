@@ -63,6 +63,8 @@ if __name__ == "__main__":
         open(client, force=30, permil=100)
 
         time.sleep(1.0)
-
+        
+    close(client, force=70, permil=100)
+    time.sleep(1.5)
     client.close()
     print("\n🔚 Open-Close sequence finished.")
