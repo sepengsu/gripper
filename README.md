@@ -112,13 +112,19 @@ Python 3.10으로 **Windows에서 개발하고**, **Ubuntu 22.04에서 수정 �
 ## 📁 프로젝트 구조
 
 ```
-gripper-control/
-├── README.md
-├── main.py
-├── serial_handler.py
-├── gripper_protocol.py
-├── requirements.txt
-└── venv/
+gripper_control/
+├── function_to_bytes/
+│   └── position.py, force.py, crc.py ...
+├── base_function/
+│   └── bus_io.py
+├── high_level_gripper/
+│   └── gripper_controller.py
+├── ros2_node/
+│   └── gripper_node.py
+├── launch/
+│   └── gripper.launch.py
+└── CMakeLists.txt / package.xml
+
 ```
 
 ---

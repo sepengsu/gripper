@@ -61,7 +61,7 @@ if __name__ == "__main__":
                 if safe_initialize(client, direction=1):
                     # ✅ 초기화 성공 시 Force & Position 전송
                     send_and_receive(client, set_force(0x01, 40), "Set Force 40%")
-                    send_and_receive(client, set_position(0x01, 500), "Move to Position 50%")
+                    send_and_receive(client, set_position(0x01, 200), "Move to Position 50%")
                 else:
                     print("🛑 Initialization failed. Aborting.")
 
