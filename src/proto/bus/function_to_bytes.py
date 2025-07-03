@@ -62,6 +62,20 @@ def read_position(slave_addr=0x01):
 def read_init_state(slave_addr=0x01):
     return create_modbus_read_command(slave_addr, 0x0200, 1)
 
+def disable_io_mode(slave_addr=0x01):
+    return create_modbus_write_command(slave_addr, 0x0402, 0)
+
+def create_modbus_read_command(slave_addr, reg_addr, count=1):
+    """
+    Function code 0x03 - Read Holding Registers
+    """
+    frame = bytearray()
+    frame.append(slave_addr)
+    frame.append(0x03)
+    frame += reg_addr.to_bytes(2, byteorder='big')
+    frame += count.to_bytes(2, byteorder='big')
+    frame += calc_crc(frame)
+    return bytes(frame)
 # === 상태 응답 파서 ===
 
 def parse_status_response(response):
@@ -82,3 +96,15 @@ def parse_status_response(response):
         return "물체 낙하"
     else:
         return f"알 수 없는 상태값: {status}"
+    
+def parse_io_mode_response(resp_bytes):
+    """
+    응답 형식 예: 01 03 02 00 01 CRC1 CRC2 (값: 0x0001 → ON)
+    """
+    if len(resp_bytes) < 7:
+        raise ValueError("응답 길이 부족")
+    if resp_bytes[1] != 0x03:
+        raise ValueError("Function Code 불일치")
+
+    value = int.from_bytes(resp_bytes[3:5], byteorder='big')
+    return value  # 0이면 OFF, 1이면 ON

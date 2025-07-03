@@ -1,6 +1,5 @@
-import platform
 import serial.tools.list_ports
-from pymodbus.client import ModbusSerialClient
+from pymodbus.client.serial import ModbusSerialClient  # 최신 구조
 
 def list_serial_ports():
     """
@@ -21,21 +20,37 @@ def identify_gripper_port(port_list):
         print(f"🔍 Testing port: {port}")
         try:
             client = ModbusSerialClient(
-                method='rtu',
                 port=port,
                 baudrate=115200,
-                stopbits=1,
                 bytesize=8,
                 parity='N',
-                timeout=0.5
+                stopbits=1,
+                timeout=1
             )
+
             if client.connect():
-                result = client.read_holding_registers(address=0x0200, count=1, unit=1)  # Init state
+                result = client.read_holding_registers(address=0x0200, count=1, slave=1)  # unit=1 → slave=1
                 client.close()
                 if result and not result.isError():
                     print(f"✅ Gripper found at {port} (InitState={result.registers[0]})")
                     return port
+                else:
+                    print(f"⚠️ No valid response on {port}")
+            else:
+                print(f"❌ Failed to connect to {port}")
         except Exception as e:
             print(f"⚠️ Error on {port}: {e}")
     print("❌ Gripper not found in the given ports.")
     return None
+
+if __name__ == "__main__":
+    ports = list_serial_ports()
+
+    if not ports:
+        print("❌ No serial ports found.")
+    else:
+        gripper_port = identify_gripper_port(ports)
+        if gripper_port:
+            print(f"Gripper is connected to: {gripper_port}")
+        else:
+            print("No gripper detected on available ports.")
