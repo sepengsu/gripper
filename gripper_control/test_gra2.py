@@ -73,5 +73,5 @@ if __name__ == "__main__":
         print("✅ Grasp-ungrasp cycle complete")
     else:
         print("🛑 Grasp failed. Object may not be present.")
-
+        ungrasp(client)
     client.close()

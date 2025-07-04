@@ -4,13 +4,17 @@ from gripper_function.motion import set_force_level, move_to_position
 from function_to_bytes.response_parser import parse_status_response
 import time
 
-def grasp(client, slave_addr=0x01):
+def grasp(client, slave_addr=0x01,position=500, force=20):
     """
     그리퍼를 파지 동작으로 움직입니다.
     Position이 작을수록 더 닫히며, Force를 강하게 설정합니다.
+    :param client: Modbus 클라이언트 객체
+    :param slave_addr: 슬레이브 주소 (기본값: 0x01
+    :param position: 파지 위치 (0~1000, 기본값: 50%에 해당하는 500)
+    :param force: 파지 힘 (0~100, 기본값: 20%)
     """
-    set_force_level(client, percent=20, slave_addr=slave_addr)        # 강한 힘
-    move_to_position(client, permil=50, slave_addr=slave_addr)        # 거의 완전히 닫힘 (0~100 권장)
+    set_force_level(client, percent=force, slave_addr=slave_addr)  # 강한 힘
+    move_to_position(client, permil=position, slave_addr=slave_addr)  # Position은 0~1000 사이 (0~100%에 해당)
 
 def ungrasp(client, slave_addr=0x01):
     """
@@ -20,12 +24,13 @@ def ungrasp(client, slave_addr=0x01):
     set_force_level(client, percent=30, slave_addr=slave_addr)        # 약한 힘
     move_to_position(client, permil=900, slave_addr=slave_addr)       # 거의 완전히 열림 (800~1000 권장)
 
-def safe_grasp(client, slave_addr=0x01, timeout=5.0, auto_release=False) -> bool:
+def safe_grasp(client, slave_addr=0x01, timeout=5.0, auto_release=False,
+               position=500, force=20) -> bool:
     """
     개선된 파지 함수 - 충분한 상태 확인 후 성공 여부 판단
     """
     print("🦾 Grasp 시도 중...")
-    grasp(client, slave_addr)
+    grasp(client, slave_addr, position=position, force=force)
 
     start = time.time()
     no_object_count = 0

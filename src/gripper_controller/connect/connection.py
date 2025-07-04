@@ -8,7 +8,7 @@ def list_serial_ports():
     """
     ports = serial.tools.list_ports.comports()
     port_names = [p.device for p in ports]
-    print(f"🔌 Found ports: {port_names}")
+    # print(f"🔌 Found ports: {port_names}")
     return port_names
 
 def identify_gripper_port(port_list):
@@ -17,7 +17,7 @@ def identify_gripper_port(port_list):
     Modbus RTU 프로토콜로 응답 확인
     """
     for port in port_list:
-        print(f"🔍 Testing port: {port}")
+        # print(f"🔍 Testing port: {port}")
         try:
             client = ModbusSerialClient(
                 port=port,
@@ -37,12 +37,51 @@ def identify_gripper_port(port_list):
                 else:
                     print(f"⚠️ No valid response on {port}")
             else:
-                print(f"❌ Failed to connect to {port}")
+                pass
+                # print(f"❌ Failed to connect to {port}")
         except Exception as e:
-            print(f"⚠️ Error on {port}: {e}")
+            pass
+            # print(f"⚠️ Error on {port}: {e}")
     print("❌ Gripper not found in the given ports.")
     return None
+def connect_gripper(port):
+    """
+    주어진 포트에 Gripper 연결 시도
+    """
+    try:
+        client = ModbusSerialClient(
+            port=port,
+            baudrate=115200,
+            bytesize=8,
+            parity='N',
+            stopbits=1,
+            timeout=1
+        )
+        if client.connect():
+            print(f"✅ Connected to gripper on {port}")
+            return client
+        else:
+            print(f"❌ Failed to connect to gripper on {port}")
+            return None
+    except Exception as e:
+        print(f"⚠️ Error connecting to gripper on {port}: {e}")
+        return None
+    
+def find_gripper():
+    """
+    시스템에 연결된 시리얼 포트 중 Gripper가 연결된 포트 찾기
+    """
+    ports = list_serial_ports()
+    if not ports:
+        print("❌ No serial ports found.")
+        return None
 
+    gripper_port = identify_gripper_port(ports)
+    if gripper_port:
+        return connect_gripper(gripper_port)
+    else:
+        print("No gripper detected on available ports.")
+        return None
 if __name__ == "__main__":
     ports = list_serial_ports()
 
